@@ -1,0 +1,61 @@
+# Gitignore for Tanuki-Programmer
+
+# Operating System
+.DS_Store
+Thumbs.db
+
+# Build artifacts
+/build/
+/dist/
+/out/
+/target/
+
+# Dependencies
+/node_modules/
+/vendor/
+/venv/
+
+# Logs and temporary files
+*.log
+*.tmp
+*.temp
+temp/
+tmp/
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# IDE-specific files
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Compiled files
+*.pyc
+__pycache__/
+*.class
+*.o
+*.so
+*.dll
+*.exe
+
+# Data and models
+/data/processed/
+/models/trained/
+*.pt
+*.pth
+*.onnx
+*.gguf
+*.safetensors
+
+# Test reports
+/coverage/
+.nyc_output/
+
+# Other
+*.zip
+*.tar.gz
+*.rar

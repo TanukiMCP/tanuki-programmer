@@ -1,0 +1,48 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: tanuki-programmer-service # Must match the service name in cloudbuild.yaml
+  annotations:
+    run.googleapis.com/client-name: cloud-console
+  labels:
+    cloud.googleapis.com/location: us-central1 # Must match the region in cloudbuild.yaml
+spec:
+  template:
+    metadata:
+      annotations:
+        autoscaling.knative.dev/minScale: "0" # Scale down to zero instances when idle
+        autoscaling.knative.dev/maxScale: "1" # Adjust max instances based on expected load
+        # Add annotation for GPU if using Cloud Run for Anthos or GKE with GPUs
+        # run.googleapis.com/accelerator: nvidia-tesla-t4 # Example for T4 GPU
+    spec:
+      containers:
+      - image: gcr.io/cloud-builders/docker # Placeholder, will be replaced by Cloud Build
+        ports:
+        - containerPort: 8000 # Must match the EXPOSE port in Dockerfile
+        resources:
+          limits:
+            cpu: "2" # Adjust CPU based on model inference needs
+            memory: "4Gi" # Adjust memory based on model size and application requirements
+            # Add GPU resource if applicable (e.g., for model inference)
+            # nvidia.com/gpu: "1" # Example for 1 GPU
+        env:
+        - name: OLLAMA_BASE_URL
+          value: "http://localhost:11434" # If Ollama runs as a sidecar or separate service
+        - name: TANUKI_CONFIG_PATH
+          value: "/app/config/tanuki_config.json" # Path to the application config
+        # Add environment variables for model paths, API keys, etc.
+        - name: MISTRAL_GGUF_PATH
+          value: "/app/models/mistral-3b-q4_k_m.gguf" # Path to the backbone model
+        - name: LORA_ADAPTERS_DIR
+          value: "/app/models/lora_adapters/" # Directory for LoRA adapters
+        # Add any other environment variables your application needs
+        # - name: API_KEY
+        #   valueFrom:
+        #     secretKeyRef:
+        #       name: my-api-secret
+        #       key: api_key
+      timeoutSeconds: 300 # Adjust timeout for long-running tasks
+      serviceAccountName: default # Use a dedicated service account for production
+  traffic:
+  - percent: 100
+    latestRevision: true

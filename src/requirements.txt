@@ -1,0 +1,13 @@
+docker
+psutil
+datasets
+tqdm
+transformers
+peft
+torch
+accelerate
+pytest
+flake8
+fastapi
+uvicorn
+peft

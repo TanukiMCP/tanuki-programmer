@@ -1,13 +1,99 @@
-docker
-psutil
-datasets
-tqdm
-transformers
-peft
-torch
-accelerate
-pytest
-flake8
-fastapi
-uvicorn
-peft
+# Core ML and Training Dependencies
+torch>=2.0.0
+transformers>=4.30.0
+peft>=0.4.0
+accelerate>=0.20.0
+datasets>=2.12.0
+tqdm>=4.65.0
+
+# PyCharm Integration and IDE Support
+# Note: PyCharm integration will be handled through plugin architecture
+# These are supporting libraries for Python project analysis
+ast-deref>=0.1.0
+jedi>=0.18.0
+rope>=1.7.0
+autopep8>=2.0.0
+black>=23.0.0
+isort>=5.12.0
+pylint>=2.17.0
+mypy>=1.3.0
+
+# Data Science and ML Libraries
+pandas>=2.0.0
+numpy>=1.24.0
+scikit-learn>=1.3.0
+matplotlib>=3.7.0
+seaborn>=0.12.0
+jupyter>=1.0.0
+ipykernel>=6.23.0
+notebook>=6.5.0
+
+# Web Development Frameworks
+django>=4.2.0
+flask>=2.3.0
+fastapi>=0.100.0
+sqlalchemy>=2.0.0
+celery>=5.3.0
+redis>=4.6.0
+
+# DevOps and Deployment
+docker>=6.1.0
+kubernetes>=26.1.0
+terraform-python>=0.1.0
+ansible>=8.0.0
+boto3>=1.26.0
+
+# API and Web Server
+uvicorn>=0.22.0
+gunicorn>=21.0.0
+requests>=2.31.0
+httpx>=0.24.0
+
+# Testing and Quality Assurance
+pytest>=7.4.0
+pytest-cov>=4.1.0
+pytest-mock>=3.11.0
+flake8>=6.0.0
+coverage>=7.2.0
+
+# Utilities and System Management
+psutil>=5.9.0
+pydantic>=2.0.0
+python-dotenv>=1.0.0
+click>=8.1.0
+rich>=13.4.0
+
+# PyCharm Tool Integration
+# These libraries support various PyCharm tool integrations
+virtualenv>=20.23.0
+pip-tools>=6.13.0
+poetry>=1.5.0
+conda>=23.5.0
+
+# Code Analysis and Refactoring
+vulture>=2.7.0  # Dead code detection
+bandit>=1.7.0   # Security analysis
+safety>=2.3.0   # Dependency vulnerability scanning
+
+# Documentation Generation
+sphinx>=7.0.0
+sphinx-autodoc-typehints>=1.23.0
+mkdocs>=1.4.0
+
+# Git and Version Control Integration
+gitpython>=3.1.0
+pre-commit>=3.3.0
+
+# Configuration Management
+pyyaml>=6.0.0
+toml>=0.10.0
+configparser>=5.3.0
+
+# Logging and Monitoring
+loguru>=0.7.0
+prometheus-client>=0.17.0
+
+# Type Checking and Static Analysis
+types-requests>=2.31.0
+types-pyyaml>=6.0.0
+pyright>=1.1.0

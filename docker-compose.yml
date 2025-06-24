@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  vllm:
+    image: vllm/vllm-openai:latest
+    runtime: nvidia
+    gpus: all
+    volumes:
+      - ~/.cache/huggingface:/root/.cache/huggingface
+      - ./models/lora_adapters:/app/models/lora_adapters
+    ports:
+      - "8000:8000"
+    ipc: host
+    command: >
+      --model deepseek-ai/DeepSeek-Coder-V2-Lite 
+      --trust-remote-code 
+      --enable-lora 
+      --max-loras 128 
+      --max-lora-rank 64
+      --lora-modules tanuki-python-coder=/app/models/lora_adapters/tanuki-python-coder
+    environment:
+      - HUGGING_FACE_HUB_TOKEN=${HUGGING_FACE_HUB_TOKEN}
+
+  orchestrator:
+    build:
+      context: ./src
+    ports:
+      - "8080:8080"
+    depends_on:
+      - vllm
+    environment:
+      - VLLM_URL=http://vllm:8000
+
+networks:
+  default:
+    driver: bridge 

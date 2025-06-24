@@ -4,6 +4,7 @@ import itertools
 from typing import List, Dict, Any, Callable, Optional
 from datasets import load_dataset
 from tqdm import tqdm
+import re
 
 class DataSynthesisPipeline:
     """
@@ -15,6 +16,23 @@ class DataSynthesisPipeline:
         self.output_dir = output_dir
         os.makedirs(self.output_dir, exist_ok=True)
         print(f"DataSynthesisPipeline initialized. Output directory: {self.output_dir}")
+
+    def _extract_docstring(self, python_code: str) -> str:
+        """
+        Extracts the docstring from a Python function.
+        This is a simplified implementation.
+        """
+        try:
+            # Find the first triple-quoted string
+            match = re.search(r'"""(.*?)"""', python_code, re.DOTALL)
+            if match:
+                return match.group(1).strip()
+            match = re.search(r"'''(.*?)'''", python_code, re.DOTALL)
+            if match:
+                return match.group(1).strip()
+        except Exception:
+            pass
+        return "No docstring found."
 
     def download_and_process_dataset(self, dataset_name: str, split: str = "train", num_samples: int = -1) -> List[Dict[str, Any]]:
         """
@@ -148,13 +166,34 @@ class DataSynthesisPipeline:
             "completion": f"Thought: {thought}\nAction: {action}\nObservation: {observation}\nThought: {thought_final}\nAction: {action_final}"
         }
 
+    def synthesize_python_dev_example(self, data_sample: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        """
+        Synthesis strategy for python development examples.
+        """
+        python_code = data_sample.get("content") or data_sample.get("text")
+        if not python_code:
+            return None
+
+        docstring = self._extract_docstring(python_code)
+        instruction = f"Implement the following Python function: {docstring}"
+        
+        return {
+            "instruction": instruction,
+            "thought": "I need to analyze the Python requirements, write clean code, and validate it using Python tools.",
+            "tool_calls": [
+                {"tool": "write_file", "content": python_code, "path": "src/solution.py"},
+                {"tool": "run_terminal_cmd", "command": "python -m py_compile src/solution.py"},
+            ],
+            "final_answer": python_code
+        }
+
     def get_synthesis_strategy(self, agent_type: str) -> Callable[[Dict[str, Any]], Dict[str, Any]]:
         """Returns the appropriate synthesis strategy function for a given agent type."""
         strategies = {
             "tanuki-coder": self.synthesize_coder_example,
             "tanuki-debugger": self.synthesize_debugger_example,
             "tanuki-reviewer": self.synthesize_reviewer_example,
-            # Add other agent types and their strategies here
+            "tanuki-python-dev": self.synthesize_python_dev_example,
         }
         strategy = strategies.get(agent_type)
         if not strategy:
@@ -206,6 +245,64 @@ class DataSynthesisPipeline:
                 f.write(json.dumps(entry) + "\n")
         print("Data storage complete.")
 
+def extract_docstring(python_code: str) -> str:
+    """
+    Extracts the docstring from a Python function.
+    This is a simplified implementation.
+    """
+    try:
+        # Find the first triple-quoted string
+        match = re.search(r'\"\"\"(.*?)\"\"\"', python_code, re.DOTALL)
+        if match:
+            return match.group(1).strip()
+        match = re.search(r"'''(.*?)'''", python_code, re.DOTALL)
+        if match:
+            return match.group(1).strip()
+    except Exception:
+        pass
+    return "No docstring found."
+
+
+def synthesize_python_development_data(example):
+    """
+    Synthesizes a single training example from a Python code snippet.
+    """
+    python_code = example.get("content") or example.get("text")
+    if not python_code:
+        return None
+
+    docstring = extract_docstring(python_code)
+    instruction = f"Implement the following Python function: {docstring}"
+    
+    return {
+        "instruction": instruction,
+        "thought": "I need to analyze the Python requirements, write clean code, and validate it using Python tools.",
+        "tool_calls": [
+            {"tool": "write_file", "content": python_code, "path": "src/solution.py"},
+            {"tool": "run_terminal_cmd", "command": "python -m py_compile src/solution.py"},
+        ],
+        "final_answer": python_code
+    }
+
+def process_dataset(dataset_name: str, split: str, output_dir: str):
+    """
+    Downloads a dataset from Hugging Face, processes it, and saves it to disk.
+    """
+    print(f"Loading dataset {dataset_name}...")
+    dataset = load_dataset(dataset_name, split=split, streaming=True) # Use streaming for large datasets
+
+    processed_dataset = map(synthesize_python_development_data, dataset)
+    
+    # In a real pipeline, you would save this processed dataset to a file or database.
+    # For this example, we'll just print a few examples.
+    print("Processing dataset...")
+    for i, example in enumerate(processed_dataset):
+        if example:
+            print(f"--- Example {i+1} ---")
+            print(example)
+        if i >= 4: # Print first 5 valid examples
+            break
+
 if __name__ == "__main__":
     pipeline = DataSynthesisPipeline()
 
@@ -233,4 +330,21 @@ if __name__ == "__main__":
         num_samples=50 # Small number for quick test
     )
 
+    # Example for generating data for the 'tanuki-python-dev' agent
+    pipeline.generate_and_store_react_data(
+        dataset_name="bigcode/the-stack-v2",
+        agent_type="tanuki-python-dev",
+        split="train",
+        num_samples=100 # small number for demonstration
+    )
+
     print("\nData synthesis pipeline demonstration complete.")
+
+    # Example usage:
+    # This will process the python subset of 'bigcode/the-stack-v2'
+    # In a real scenario, you would run this for each dataset needed for the agents.
+    process_dataset(
+        dataset_name="bigcode/the-stack-v2",
+        split="train",
+        output_dir="data/processed"
+    )

@@ -211,6 +211,23 @@ class AdapterLoaderUnloader:
         """Returns the simulated VRAM usage by loaded adapters."""
         return self.current_vram_usage_gb
 
+# In a real implementation, this could be loaded from a config file
+# or discovered from the filesystem.
+AVAILABLE_LORA_ADAPTERS = [
+    "tanuki-python-coder",
+    # ... other 126 adapters would be listed here
+]
+
+def list_available_adapters():
+    """Returns a list of available LoRA adapters."""
+    return AVAILABLE_LORA_ADAPTERS
+
+def get_adapter_path(adapter_name: str) -> str:
+    """Returns the path to a LoRA adapter."""
+    if adapter_name not in AVAILABLE_LORA_ADAPTERS:
+        raise ValueError(f"Adapter {adapter_name} not found.")
+    return f"/app/models/lora_adapters/{adapter_name}"
+
 if __name__ == "__main__":
     # Test ResourceMonitor
     monitor = ResourceMonitor()

@@ -10,11 +10,12 @@ These agents handle data science and machine learning tasks including:
 """
 
 # Core data science agents would be imported here
-# from .pandas_agent import TanukiPandas
-# from .jupyter_agent import TanukiJupyter
+from .pandas_agent import TanukiPandas
+from .jupyter_agent import TanukiJupyter
 # from .sklearn_agent import TanukiSKLearn
 # etc.
 
 __all__ = [
-    # Data science agents will be implemented as needed
+    "TanukiPandas",
+    "TanukiJupyter",
 ] 
